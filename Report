@@ -1,0 +1,102 @@
+Report on 
+Digit Recognizer : A Kaggle challenge
+Nandini Ramanan
+nramanan@iu.edu
+
+ 
+ABSTRACT
+In this report, I consolidate the gist of the work I put into implementing this Digit recognizer. Based on the theoretical understanding of machine learning concepts and various classifiers along with the study excellent benchmarks set in “Titanic:Machines learning from disaster”( another Kaggle problem), I zeroed into this particular challenge.
+1.	Why Digit recognizer
+Handwritten digits are very significant to our daily life. One of the first uses that comes to mind is that of Data of birth.
+DOB predominantly consists of 6 digit and is one of the most important parts of one’s identity. Many years ago, an individual would read it manually for identifying one self. However, this type of work is now automated by using optical character recognition (OCR) - similar to the type of solution we’ll be implementing in this article. We have machines reading ones DOB from handwritten papers, such as in medical prescriptions.
+2.	Mechanism 
+I will enumerate the steps that are needed to detect handwritten digits -
+1.	Create a database of handwritten digits or use existing
+2.	For each handwritten digit in the database, train a classifier
+3.	 Use the classifier trained in step 2 to predict digits.
+
+3.	Dataset
+The data for this particular challenge are taken from MNIST Dataset "Modified National Institute of Standards and Technology". MNIST dataset is a classic within the Machine Learning community that has been extensively studied. “It is a good database for people who want to try learning techniques and pattern recognition methods on real-world data while spending minimal efforts on preprocessing and formatting.” The original MNIST dataset consists of actual images, pre-processed and formatted in gray-scale images. In the Kaggle dataset, the image pixel data is already encoded into numeric values in a CSV file. Train.csv file contains 42000 rows for training data. Each row contains of a label as the first column, with the remaining columns being the pixel color data (values of 0-255).
+For instance digit 4, the data wil appear as,
+0	0	0	.....220	179	....0	0
+4.	Problem statement
+The digit recognition project deals with classifying data from the MNIST dataset. The data contains 42,000 numbers of 28x28 features of the handwritten digits. By using selected machine learning algorithm, a program can be developed to accurately read the handwritten digits within around 95% accuracy. The rate can be even higher, depending on the selected machine learning algorithm.
+5.	Random forest 
+Random Forest approach is used to train this data and test with Kaggle's test data. Random Forest uses an ensemble of decision trees to learn. An ensemble of classifiers has better classification performance than individual classifiers. Also an ensemble portrays better noise resilience. Here decision trees are built from a sample drawn from the training set. Not to forget these samples are with replacement. This prevents over fitting since it decreases the variance without changing the bias. 
+6.	Algorithm
+Random forest works like a bagging algorithm:
+a.	A random sample of size N with replacement from the data is drawn.
+b.	Another random sample without replacement of the predictors.
+c.	make a split by using predictors selected in Step b.
+d.	Steps 2 and 3 for each subsequent split until the tree is as large as desired. 
+e.	discard the out-of-bag data down the tree. 
+f.	Repeat Steps a-e a large number of times 
+g.	For each observation in the dataset, count the number of trees that it is classified in one category over the number of trees.
+h.	Assign each observation to a final category by a majority vote over the set of trees. 
+7.	The code part
+Getting back to our problem space, I am dealing with 42000 samples having 784 features each. 
+//Read the train csv file
+trainLabels, trainData = getTrainData('train_new.csv')
+//call the model to fittrainModel = RandomForestClassifier(n_estimators=100,ntree=100)
+trainModel.fit(data, labels) 
+//Read the test data
+testData = getTrainData('test.csv', True)
+testLabels = getBenchMarkTestLabels('submission.csv')
+//Call the predict function
+out1= model.predict(inp)
+I ran the above code on the Kaggle dataset and my accuracy came around 94%. TO improve my accuracy I set the ntree=10, just to ensure no overfitting in the data. My accuracy improved to 96%. Ideally ntree=500 is selected. I also tuned the other tunable parameters like Node size and Number of predictor sample.
+8.	Random Forest works. Why?
+
+Random forests are a form of bagging, and the averaging over trees can substantially can avoid any form of instability. Here we are working on a random sample of predictors at each possible split,  and the fitted values across trees are more independent. 
+Also the tuning parameters here help it to be the very best classifier here :
+Node size : Grow trees but little bias
+No of trees : 500 ideally, I worked with something lowlike 10
+Number of predicted samples: This may be the key parameter, I ran with something between 2-5 for better results.
+9.	KNN 
+I tried to use KNN to perform digit recognition. The algorithm finds the “K” most nearest training examples and classifies the test sample based on that. 
+On the new set of information, we do the following :
+•	Find Euclidean distance, for the k nearest entities from the training set. These entities have known labels. The choice of k is left to us. 
+ 
+We use Euclidean distance because we are essentially dealing with points in a Cartesian coordinate system. 
+•	Among these k entities, whichever is common. That is the label for the unknown entity.
+We do not have any tuning parameter in KNN algorithm. Jus deciding on the K value takes a toil. Essentially a non parametric model 
+There is essentially no preliminary calculation involved.  We have a dataset, which we make predictions with.
+
+10.	Code 
+
+//My model is trained here
+trainModel = KNeighborsClassifier(n_neighbors=23)
+	if model == "forest":
+		trainModel = RandomForestClassifier(n_estimators=100)
+	trainModel.fit(data, labels)
+	return trainModel
+// Prediction happens here
+ans = model.predict(inp)
+I tried varying values for K and stopped with 23 which gives me an accuracy of around 97%
+11.	Sample output :
+
+I get better results for KNN then RF.
+I have done Dimensionality reduction  to the actual  set and tested to get the better results for accuracy. 
+
+I have done cross validation estimate the best values for parameters in RF and KNN. No of trees for RF and K for KNN. I do cross validation to the actual Dataset and also  Dimensionality reduced data set here. 
+Also this is after I do dimentionality reduction and CV over  the existing Dataset.
+Best Hyper Parameter with reduced Dimensionality ShuffleSplit(2999, n_iter=7, test_size=0.3, random_state=0)
+13
+Prediction  Accuracy:  0.899665551839
+--------------------------------------------
+Best Hyper Parameter with original Dimensionality ShuffleSplit(2999, n_iter=7, test_size=0.3, random_state=0)
+13
+Prediction  Accuracy:  0.899665551839
+--------------------------------------------
+Best Hyper Parameter with reduced Dimensionality ShuffleSplit(2999, n_iter=7, test_size=0.3, random_state=0)
+100
+Prediction  Accuracy:  0.939799331104
+--------------------------------------------
+Best Hyper Parameter with original Dimensionality ShuffleSplit(2999, n_iter=7, test_size=0.3, random_state=0)
+100
+Prediction  Accuracy:  0.939799331104
+
+ 
+
+--Process finished with exit code 0- 
+
